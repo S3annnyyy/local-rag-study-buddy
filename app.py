@@ -1,6 +1,6 @@
 import pyperclip
 import streamlit as st
-from src.assistant.utils import process_uploaded_files
+from src.agent.utils import process_uploaded_files
 from src.theme.custom import set_custom_theme
 from dotenv import load_dotenv
 
@@ -8,9 +8,29 @@ load_dotenv()
 
 def generate_response(user_input: str , enable_web_search: bool, max_search_queries: int):
 	"""
-	Generate response using the agent and stream steps
+	Generate a response based on the user input using the agent, with optional web search capability.
+	Args:
+		user_input (str): The input message or question from the user.
+		enable_web_search (bool): Flag to enable or disable web search functionality.
+		max_search_queries (int): The maximum number of web search queries to perform if web search is enabled.
+	Returns:
+		str: The generated response based on user input and optional web search results.
 	"""
-	raise NotImplementedError
+	langgraph_status = st.status("**Agent running...**", state="running") # Sets status to running  
+	initial_state = {
+		"user_instructions": user_input,
+	}
+	config = {
+		"configurable": {
+			"enable_web_search": enable_web_search,
+			"max_search_queries": max_search_queries,
+		}
+	}
+
+	#TODO
+
+	langgraph_status.update(state="complete", label="**Using Langgraph** (Tasks completed)")
+	return {"final_answer": "Placeholder text"}
 
 def clear_chat():
 	st.session_state.messages = []
