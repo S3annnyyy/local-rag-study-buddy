@@ -34,7 +34,7 @@ def create_vector_database(CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 		vectorstore = Chroma.from_documents(split_documents, embeddings, persist_directory=VECTOR_DB_PATH)
 	return vectorstore
 
-def add_documents(documents: list, CHUNK_SIZE, CHUNK_OVERLAP):
+def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 	"""
 	Add new documents to the existing vectorstore.
 
