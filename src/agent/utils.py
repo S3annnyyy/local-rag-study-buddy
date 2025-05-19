@@ -55,3 +55,34 @@ def invoke_ollama(model: str, system_prompt: str, user_prompt: str, output_forma
 		return output_format.model_validate_json(chat_response.message.content)
 	else:
 		return chat_response.message.content
+
+def tavily_web_search_tool(query: str, include_raw_content=True, max_results=3):
+	"""
+	This function conducts web search using Tavily API
+
+	Args:
+		query (str): The search query to execute
+		include_raw_content (bool): Whether to include the raw_content from Tavily in the formatted string
+		max_results (int): Maximum number of results to return
+
+	Returns:
+		dictionary of format:
+		{
+			"results": [
+				{
+					"title": "Title of the page",
+					"url": "https://link.to/the/page",
+					"content": "Summary or snippet of the page content",
+					"raw_content": "Full raw HTML/text content of the page"  # Only if include_raw_content=True
+				},
+			]
+		}
+	"""
+	tavily_client = TavilyClient()
+	response = tavily_client.search(
+		query,
+		max_results=max_results,
+		include_raw_content=include_raw_content
+	)
+
+	return response
