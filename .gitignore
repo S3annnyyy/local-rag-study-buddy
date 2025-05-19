@@ -87,3 +87,7 @@ __pypackages__/
 
 # Local secrets
 secrets.json
+
+
+# Temp files
+existing_vectorstore
