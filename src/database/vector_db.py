@@ -4,35 +4,22 @@ from langchain_experimental.text_splitter import SemanticChunker
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from datetime import datetime
 
+timestamp = datetime.now().strftime("%Y%m%d")
+VECTOR_DB_PATH = f"vectorstore_{timestamp}"
 
-VECTOR_DB_PATH = "existing_vectorstore"
-
-def create_vector_database(CHUNK_SIZE: int, CHUNK_OVERLAP: int):
+def retrieve_vector_database():
 	"""
-	This function creates vector database or retrieves from vectorstore if exists
-	Args:
-		CHUNK_SIZE (int):
-		CHUNK_OVERLAP (int): 
+	This function initializes a vector database or retrieves from vectorstore if exists
 	"""
 	embeddings = HuggingFaceEmbeddings()
-	if os.path.exists(VECTOR_DB_PATH) and os.listdir(VECTOR_DB_PATH):			
+	if os.path.exists(VECTOR_DB_PATH) and os.listdir(VECTOR_DB_PATH):
+		print(f"Existing vectorstore: {VECTOR_DB_PATH} found")			
 		vectorstore = Chroma(persist_directory=VECTOR_DB_PATH, embedding_function=embeddings)
 	else:
-		# Load documents and create a new vectorstore
-		loader = DirectoryLoader("./files")
-		docs = loader.load()
-		
-		# Process the new documents
-		semantic_text_splitter = SemanticChunker(embeddings)
-		documents = semantic_text_splitter.split_documents(docs)
-		text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-			chunk_size=CHUNK_SIZE,
-			chunk_overlap=CHUNK_OVERLAP
-		)
-		split_documents = text_splitter.split_documents(documents)
+		# Initialize a new vectorstore
 		vectorstore = Chroma.from_documents(
-			split_documents,
 			embeddings,
 			persist_directory=VECTOR_DB_PATH
 		)
@@ -41,7 +28,9 @@ def create_vector_database(CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 
 def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 	"""
-	Add new documents to the existing vectorstore.
+	This function converts documents uploaded into embeddings and either
+		(a) Add to existing vectorstore
+		(b) Create vectorestore and add embeddings inside 
 
 	Args:
 		documents (list): List of documents to add to the vectorstore
@@ -49,6 +38,7 @@ def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 	embeddings = HuggingFaceEmbeddings()
 	
 	# Process the new documents
+	print("Processing documents...")
 	semantic_text_splitter = SemanticChunker(embeddings)
 	documents = semantic_text_splitter.split_documents(documents)
 	text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -58,9 +48,10 @@ def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 	split_documents = text_splitter.split_documents(documents)
 
 	# Add to existing vectorstore
-	if os.path.exists(VECTOR_DB_PATH) and os.listdir(VECTOR_DB_PATH):			
+	if os.path.exists(VECTOR_DB_PATH) and os.listdir(VECTOR_DB_PATH):	
 		vectorstore = Chroma(persist_directory=VECTOR_DB_PATH, embedding_function=embeddings)
 		vectorstore.add_documents(split_documents)
+		print("Added documents to vectorstore")	
 	else:
 		# Create new vector store if it doesn't exist
 		vectorstore = Chroma.from_documents(
@@ -68,5 +59,6 @@ def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 			embeddings,
 			persist_directory=VECTOR_DB_PATH
 		)
-
+		print("Initialized new vectorstore")	
+	print("Processing complete")
 	return vectorstore

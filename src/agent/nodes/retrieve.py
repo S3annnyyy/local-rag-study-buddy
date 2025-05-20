@@ -1,4 +1,4 @@
-from src.database.vector_db import create_vector_database
+from src.database.vector_db import retrieve_vector_database
 
 def retrieve(state: dict):
 	"""
@@ -11,8 +11,8 @@ def retrieve(state: dict):
 	Returns:
 			state: New key added to state, documents that contains retrieved documents
 	"""
-	retriever = create_vector_database(1000, 200)
-	print("---RETRIEVE---")
+	retriever = retrieve_vector_database()
+	print("---RETRIEVING VECTORSTORE---")
 	question = state["question"]
 	documents = retriever.invoke(question)
 	return {"documents": documents, "question": question}
