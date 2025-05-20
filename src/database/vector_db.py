@@ -36,7 +36,7 @@ def create_vector_database(CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 			embeddings,
 			persist_directory=VECTOR_DB_PATH
 		)
-		retriever = vectorstore.as_retriever()
+	retriever = vectorstore.as_retriever()
 	return retriever
 
 def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
