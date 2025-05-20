@@ -4,6 +4,7 @@ import streamlit as st
 from src.agent.utils import process_uploaded_files
 from src.theme.custom import set_custom_theme
 from src.agent.workflow import RAG_AGENT
+from src.agent.utils import invoke_ollama
 
 
 def extract_response_components(generation: str):
@@ -22,51 +23,49 @@ def extract_response_components(generation: str):
 
     return think_block, final_answer
 
-def generate_response(user_input: str, enable_web_search: bool, max_search_queries: int):
-    """
-    Generate a response based on the user input using the agent, with optional web search capability.
-    Returns:
-        dict: The generated response and reasoning.
-    """
-    langgraph_status = st.status("**Agent running...**", state="running")  # Sets status to running
+def generate_response(user_input: str, enable_web_search: bool, max_search_queries: int, enable_rag):
+	"""
+	Generate a response based on the user input using the agent, with optional web search capability.
+	Returns:
+			dict: The generated response and reasoning.
+	"""
+	langgraph_status = st.status("**Agent running...**", state="running")  # Sets status to running
+	inputs = {"question": user_input}
+	final_generation, think_block = None, None
 
-    config = {
-        "configurable": {
-            "enable_web_search": enable_web_search,
-            "max_search_queries": max_search_queries,
-        }
-    }
+	if enable_rag:
+		print("Parsing user input to rag workflow")
+		try:
+			for output in RAG_AGENT.stream(inputs):
+				for key, value in output.items():
+					if "generation" in value:
+						final_generation = value["generation"]
 
-    inputs = {"question": user_input}
-    final_generation = None
+			if final_generation is None:
+				final_generation = "Agent couldn't find an answer."
 
-    try:
-        for output in RAG_AGENT.stream(inputs):
-            for key, value in output.items():
-                if "generation" in value:
-                    final_generation = value["generation"]
+			think_block, final_answer = extract_response_components(final_generation)
 
-        if final_generation is None:
-            final_generation = "Agent couldn't find an answer."
+			# Display think block if exists
+			if think_block:
+				with st.expander("🧠 See agent's reasoning"):
+					st.markdown(think_block)	
+			
+			langgraph_status.update(state="complete", label="**Using LangGraph** (Tasks completed)")
 
-        think_block, final_answer = extract_response_components(final_generation)
+		except Exception as e:
+			final_answer = f"An error occurred: {str(e)}"
+			think_block = ""
+			langgraph_status.update(state="error", label="Something went wrong.")
+	else:
+		print("Generating output directly from LLM")
+		final_generation = invoke_ollama(user_input)
+		think_block, final_answer = extract_response_components(final_generation)
 
-        # Display think block if exists
-        if think_block:
-            with st.expander("🧠 See agent's reasoning"):
-                st.markdown(think_block)
-
-        langgraph_status.update(state="complete", label="**Using LangGraph** (Tasks completed)")
-
-    except Exception as e:
-        final_answer = f"An error occurred: {str(e)}"
-        think_block = ""
-        langgraph_status.update(state="error", label="Something went wrong.")
-
-    return {
-        "final_answer": final_answer,
-        "reasoning": think_block
-    }
+	
+	langgraph_status.update(state="complete", label="**Using Deepseek R1 model**")
+	print("Output retrieved, parsing to frontend")
+	return {"final_answer": final_answer, "reasoning": think_block}
 
 def clear_chat():
 	st.session_state.messages = []
@@ -83,8 +82,6 @@ def main():
 		st.session_state.uploader_key = 0
 	if "messages" not in st.session_state:
 		st.session_state.messages = []
-	if "selected_report_structure" not in st.session_state:
-		st.session_state.selected_report_structure = None
 	if "max_search_queries" not in st.session_state:
 		st.session_state.max_search_queries = 5  # Default value of 5
 	if "chunk_size" not in st.session_state:
@@ -93,6 +90,8 @@ def main():
 		st.session_state.chunk_overlap = 200
 	if "files_ready" not in st.session_state:
 		st.session_state.files_ready = False  # Tracks if files are uploaded but not processed
+	if "enable_rag" not in st.session_state:
+		st.session_state.enable_rag = False
 
 	# Title row with clear button
 	col1, col2 = st.columns([6, 1])
@@ -119,6 +118,7 @@ def main():
 	)
 	
 	enable_web_search = st.sidebar.checkbox("Enable Web Search", value=False)
+	st.session_state.enable_rag = st.sidebar.checkbox("Enable RAG", value=st.session_state.enable_rag)
 	
 	# Chunk overlap
 	st.session_state.chunk_overlap = st.sidebar.slider(
@@ -149,6 +149,7 @@ def main():
 
 	# Check if files are uploaded but not yet processed
 	if uploaded_files:
+		st.session_state.enable_rag = True
 		st.session_state.files_ready = True  # Mark that files are available
 		st.session_state.processing_complete = False  # Reset processing status
 
@@ -172,13 +173,13 @@ def main():
 	
 	
 	# Display chat messages
-	for message in st.session_state.messages:
+	for index, message in enumerate(st.session_state.messages):
 		with st.chat_message(message["role"]):
 			st.write(message["content"])  # Show the message normally
 
 			# Show copy button only for AI messages at the bottom
 			if message["role"] == "assistant":
-				if st.button("📋", key=f"copy_{len(st.session_state.messages)}"):
+				if st.button("📋", key=f"copy_{index}"):
 					pyperclip.copy(message["content"])
 
 	
@@ -193,7 +194,8 @@ def main():
 		assistant_response = generate_response(
 			user_input, 
 			enable_web_search, 
-			st.session_state.max_search_queries
+			st.session_state.max_search_queries,
+			st.session_state.enable_rag
 		)
 
 		# Store assistant message
