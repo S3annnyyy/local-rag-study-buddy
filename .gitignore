@@ -91,3 +91,4 @@ secrets.json
 
 # Temp files
 existing_vectorstore
+files
