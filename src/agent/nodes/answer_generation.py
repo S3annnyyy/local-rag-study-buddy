@@ -1,8 +1,8 @@
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.chat_models import ChatOllama
+from langchain_ollama import ChatOllama
 
-LLM = ChatOllama(model="deepseek-coder:1.5b", temperature=0)
+LLM = ChatOllama(model="deepseek-r1:1.5b", temperature=0)
 
 ANSGEN_PROMPT = PromptTemplate(
 	template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|> You are an assistant for question-answering tasks.
