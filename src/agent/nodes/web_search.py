@@ -1,5 +1,6 @@
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain.schema import Document
+from src.config import TAVILY_API_KEY
 
 def tavily_web_search_tool(state: dict):
     """
@@ -14,7 +15,7 @@ def tavily_web_search_tool(state: dict):
     print("---WEB SEARCH---")
     question = state["question"]
     documents = state["documents"]
-    web_search_tool = TavilySearchResults(k=3) 
+    web_search_tool = TavilySearchResults(k=3, tavily_api_key=TAVILY_API_KEY) 
 
     documents_searched = web_search_tool.invoke({"query": question})
     web_results = "\n".join([document["content"] for document in documents_searched])
