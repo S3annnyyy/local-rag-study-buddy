@@ -1,36 +1,72 @@
+import re
 import pyperclip
 import streamlit as st
 from src.agent.utils import process_uploaded_files
 from src.theme.custom import set_custom_theme
-from dotenv import load_dotenv
+from src.agent.workflow import RAG_AGENT
 
-load_dotenv()
 
-def generate_response(user_input: str , enable_web_search: bool, max_search_queries: int):
-	"""
-	Generate a response based on the user input using the agent, with optional web search capability.
-	Args:
-		user_input (str): The input message or question from the user.
-		enable_web_search (bool): Flag to enable or disable web search functionality.
-		max_search_queries (int): The maximum number of web search queries to perform if web search is enabled.
-	Returns:
-		str: The generated response based on user input and optional web search results.
-	"""
-	langgraph_status = st.status("**Agent running...**", state="running") # Sets status to running  
-	initial_state = {
-		"user_instructions": user_input,
-	}
-	config = {
-		"configurable": {
-			"enable_web_search": enable_web_search,
-			"max_search_queries": max_search_queries,
-		}
-	}
+def extract_response_components(generation: str):
+    """
+    Extracts the <think></think> reasoning block and final answer from generation text.
+    """
+    think_block = ""
+    final_answer = generation
 
-	#TODO
+    # Find <think> block
+    think_match = re.search(r"<think>(.*?)</think>", generation, re.DOTALL)
+    if think_match:
+        think_block = think_match.group(1).strip()
+        # Remove think block from final answer
+        final_answer = re.sub(r"<think>.*?</think>", "", generation, flags=re.DOTALL).strip()
 
-	langgraph_status.update(state="complete", label="**Using Langgraph** (Tasks completed)")
-	return {"final_answer": "Placeholder text"}
+    return think_block, final_answer
+
+def generate_response(user_input: str, enable_web_search: bool, max_search_queries: int):
+    """
+    Generate a response based on the user input using the agent, with optional web search capability.
+    Returns:
+        dict: The generated response and reasoning.
+    """
+    langgraph_status = st.status("**Agent running...**", state="running")  # Sets status to running
+
+    config = {
+        "configurable": {
+            "enable_web_search": enable_web_search,
+            "max_search_queries": max_search_queries,
+        }
+    }
+
+    inputs = {"question": user_input}
+    final_generation = None
+
+    try:
+        for output in RAG_AGENT.stream(inputs):
+            for key, value in output.items():
+                if "generation" in value:
+                    final_generation = value["generation"]
+
+        if final_generation is None:
+            final_generation = "Agent couldn't find an answer."
+
+        think_block, final_answer = extract_response_components(final_generation)
+
+        # Display think block if exists
+        if think_block:
+            with st.expander("🧠 See agent's reasoning"):
+                st.markdown(think_block)
+
+        langgraph_status.update(state="complete", label="**Using LangGraph** (Tasks completed)")
+
+    except Exception as e:
+        final_answer = f"An error occurred: {str(e)}"
+        think_block = ""
+        langgraph_status.update(state="error", label="Something went wrong.")
+
+    return {
+        "final_answer": final_answer,
+        "reasoning": think_block
+    }
 
 def clear_chat():
 	st.session_state.messages = []
