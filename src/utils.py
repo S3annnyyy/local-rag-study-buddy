@@ -42,18 +42,18 @@ def process_uploaded_files(uploaded_files: list, chunk_size: int, chunk_overlap:
 		# Remove the temp folder and its contents
 		shutil.rmtree(temp_folder, ignore_errors=True)
 
-def invoke_ollama(user_prompt, model="deepseek-r1:1.5b", system_prompt="You are a helpful assistant."):
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt}
-    ]
+def invoke_ollama(user_prompt, model="deepseek-r1:1.5b", history=None):
+	messages = [{"role": "system", "content": "You are a helpful study assistant that answers clearly and concisely."}]
+	if history:
+		messages.extend(history)
+	messages.append({"role": "user", "content": user_prompt})
 
-    chat_response = chat(
-        model=model, 
-        messages=messages,
-    )
+	chat_response = chat(
+		model=model, 
+		messages=messages,
+	)
 
-    return chat_response['message']['content']
+	return chat_response['message']['content']
 
 def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)

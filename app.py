@@ -63,7 +63,7 @@ def generate_response(user_input: str, enable_web_search: bool, max_search_queri
 			logger.error(f"Exception in RAG workflow: {e}")
 	else:
 		logger.info("Routing user input to direct LLM generation.")
-		final_generation = invoke_ollama(user_input)
+		final_generation = invoke_ollama(user_input, history=st.session_state.messages)
 		think_block, final_answer = extract_response_components(final_generation)
 		logger.info("Direct LLM generation completed.")
 	
