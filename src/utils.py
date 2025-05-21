@@ -1,4 +1,6 @@
 import os
+import sys
+import logging
 import shutil
 from ollama import chat
 from langchain_community.document_loaders import CSVLoader, TextLoader, PDFPlumberLoader
@@ -53,4 +55,20 @@ def invoke_ollama(user_prompt, model="deepseek-r1:1.5b", system_prompt="You are 
 
     return chat_response['message']['content']
 
+def get_logger(name: str) -> logging.Logger:
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
 
+    if not logger.hasHandlers():
+        # Create console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.INFO)
+
+        # Create formatter and add to handler
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+
+        # Add handler to logger
+        logger.addHandler(console_handler)
+
+    return logger
