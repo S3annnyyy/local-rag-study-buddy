@@ -2,7 +2,8 @@ import re
 import torch
 import pyperclip
 import streamlit as st
-from src.utils import process_uploaded_files, invoke_ollama, get_logger
+from src.utils import process_uploaded_files, invoke_ollama
+from src.logger import get_logger
 from src.theme.custom import set_custom_theme
 from src.agent.workflow import RAG_AGENT
 

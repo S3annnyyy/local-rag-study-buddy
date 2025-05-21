@@ -1,11 +1,12 @@
 import os
-from langchain_community.document_loaders import FireCrawlLoader, DirectoryLoader
+from src.logger import get_logger 
 from langchain_experimental.text_splitter import SemanticChunker 
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from datetime import datetime
 
+logger = get_logger(__name__)
 timestamp = datetime.now().strftime("%Y%m%d")
 VECTOR_DB_PATH = f"vectorstore_{timestamp}"
 
@@ -15,12 +16,13 @@ def retrieve_vector_database():
 	"""
 	embeddings = HuggingFaceEmbeddings()
 	if os.path.exists(VECTOR_DB_PATH) and os.listdir(VECTOR_DB_PATH):
-		print(f"Existing vectorstore: {VECTOR_DB_PATH} found")			
+		logger.info(f"Existing vectorstore: {VECTOR_DB_PATH} found")			
 		vectorstore = Chroma(persist_directory=VECTOR_DB_PATH, embedding_function=embeddings)
 	else:
 		# Initialize a new vectorstore
-		vectorstore = Chroma.from_documents(
-			embeddings,
+		logger.info("No vectorstore found, initializing new vectorstore")
+		vectorstore = Chroma(
+			embedding_function=embeddings,
 			persist_directory=VECTOR_DB_PATH
 		)
 	retriever = vectorstore.as_retriever()
@@ -38,7 +40,7 @@ def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 	embeddings = HuggingFaceEmbeddings()
 	
 	# Process the new documents
-	print("Processing documents...")
+	logger.info("Processing documents...")
 	semantic_text_splitter = SemanticChunker(embeddings)
 	documents = semantic_text_splitter.split_documents(documents)
 	text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -51,7 +53,7 @@ def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 	if os.path.exists(VECTOR_DB_PATH) and os.listdir(VECTOR_DB_PATH):	
 		vectorstore = Chroma(persist_directory=VECTOR_DB_PATH, embedding_function=embeddings)
 		vectorstore.add_documents(split_documents)
-		print("Added documents to vectorstore")	
+		logger.info("Added documents to vectorstore")	
 	else:
 		# Create new vector store if it doesn't exist
 		vectorstore = Chroma.from_documents(
@@ -59,6 +61,6 @@ def add_documents(documents: list, CHUNK_SIZE: int, CHUNK_OVERLAP: int):
 			embeddings,
 			persist_directory=VECTOR_DB_PATH
 		)
-		print("Initialized new vectorstore")	
-	print("Processing complete")
+		logger.info("Initialized new vectorstore")	
+	logger.info("Document processing complete")
 	return vectorstore

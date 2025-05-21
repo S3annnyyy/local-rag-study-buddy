@@ -1,4 +1,7 @@
 from src.database.vector_db import retrieve_vector_database
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 def retrieve(state: dict):
 	"""
@@ -12,7 +15,7 @@ def retrieve(state: dict):
 			state: New key added to state, documents that contains retrieved documents
 	"""
 	retriever = retrieve_vector_database()
-	print("---RETRIEVING VECTORSTORE---")
+	logger.info("---Retrieving vectorstore---")
 	question = state["question"]
 	documents = retriever.invoke(question)
 	return {"documents": documents, "question": question}

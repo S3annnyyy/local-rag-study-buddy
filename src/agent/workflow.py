@@ -1,4 +1,3 @@
-from pprint import pprint
 from langgraph.graph import END, StateGraph
 from src.agent.nodes.retrieve import retrieve
 from src.agent.nodes.web_search import tavily_web_search_tool
@@ -54,9 +53,3 @@ workflow.add_conditional_edges(
 
 # Compile graph
 RAG_AGENT = workflow.compile()
-
-# inputs = {"question": ""}
-# for output in RAG_AGENT.stream(inputs):
-#   for key, value in output.items():
-#     pprint(f"Finished running: {key}")
-# pprint(value["generation"])
