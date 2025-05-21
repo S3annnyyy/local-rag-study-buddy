@@ -1,11 +1,12 @@
 import re
+import torch
 import pyperclip
 import streamlit as st
 from src.utils import process_uploaded_files, invoke_ollama, get_logger
 from src.theme.custom import set_custom_theme
 from src.agent.workflow import RAG_AGENT
 
-
+torch.classes.__path__ = [] # Little hack to remove torch.classes.__path__ runtime error [REF: Issue #1] 
 logger = get_logger(__name__)
 
 def extract_response_components(generation: str):
