@@ -14,7 +14,7 @@ cd local-rag-study-buddy
 ```
 
 ### Configuring environment.
-1. Create free-tier accounts from   [Tavily AI](https://tavily.com/)
+1. Obtain Tavily API Key by creating free-tier account from [Tavily AI](https://tavily.com/)
 2. Create `.env,local` file under the root folder in this manner:
 ```
 TAVILY_API_KEY=XXX
@@ -23,7 +23,7 @@ TAVILY_API_KEY=XXX
 ```
 python -m venv .venv
 ```
-4. Activate environment by running `.\venv\Scripts\Activate.ps1` for Windows Powershell or `source venv/bin/activate` for MacOs/Linux 
+4. Activate environment by running `.venv/Scripts/Activate.ps1` for Windows Powershell or `source venv/bin/activate` for MacOs/Linux 
 5. Install [ollama](https://www.ollama.com/) and download deepseek-R1 model by running the following in command prompt: (You can choose bigger models)
 ```
 ollama pull deepseek-r1:1.5b
