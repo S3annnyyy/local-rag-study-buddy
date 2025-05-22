@@ -3,6 +3,10 @@ import shutil
 from ollama import chat
 from langchain_community.document_loaders import CSVLoader, TextLoader, PDFPlumberLoader
 from src.database.vector_db import add_documents
+from src.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 def process_uploaded_files(uploaded_files: list, chunk_size: int, chunk_overlap: int):
 	"""
@@ -10,6 +14,7 @@ def process_uploaded_files(uploaded_files: list, chunk_size: int, chunk_overlap:
 	"""
 	temp_folder = "temp_files"
 	os.makedirs(temp_folder, exist_ok=True)
+	logger.info("Creating temp folders")
 
 	try:
 		for uploaded_file in uploaded_files:
@@ -31,14 +36,14 @@ def process_uploaded_files(uploaded_files: list, chunk_size: int, chunk_overlap:
 				continue
 
 			# Load and append documents
-			print("Documents loaded")
+			logger.info("Documents loaded")
 			docs = loader.load()
 			add_documents(docs, chunk_size, chunk_overlap)
 
 		return True
 	finally:
-		# Remove the temp folder and its contents
 		shutil.rmtree(temp_folder, ignore_errors=True)
+		logger.info("Temp folders dumped")
 
 def invoke_ollama(user_prompt, model="deepseek-r1:1.5b", history=None):
 	messages = [{"role": "system", "content": "You are a helpful study assistant that answers clearly and concisely."}]

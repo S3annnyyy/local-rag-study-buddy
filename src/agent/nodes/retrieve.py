@@ -15,7 +15,7 @@ def retrieve(state: dict):
 			state: New key added to state, documents that contains retrieved documents
 	"""
 	retriever = retrieve_vector_database()
-	logger.info("---Retrieving vectorstore---")
+	logger.info("---RETRIEVING VECTORSTORE---")
 	question = state["question"]
 	documents = retriever.invoke(question)
 	return {"documents": documents, "question": question}

@@ -1,8 +1,10 @@
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate 
+from src.logger import get_logger
 
 
+logger = get_logger(__name__)
 LLM = ChatOllama(model="deepseek-r1:1.5b", format="json", temperature=0)
 
 RETRIEVAL_PROMPT = PromptTemplate(
@@ -49,22 +51,21 @@ def retrieval_grader(state: dict):
 	# Init retrieval grader
 	retrieval_grader = RETRIEVAL_PROMPT | LLM | JsonOutputParser()
 
-	print("---CHECK DOCUMENT RELEVANCE TO THE QUESTION---")
-	question = state["question"]
-	documents = state["documents"]
+	logger.info("---CHECK DOCUMENT RELEVANCE TO THE QUESTION---")
+	question, documents = state["question"], state["documents"]
 
-	filtered_docs = []
-	web_search = "No"
+	filtered_docs, web_search = [], "No"
 	for doc in documents:
+		logger.info(f"Analyzing {doc.metadata.source}")
 		score = retrieval_grader.invoke({"question": question, "document": doc.page_content})
 		grade = score["score"]
-		print(f"GRADE given: {grade}")
+		logger.info(f"Is document relevant?: {grade}")
 		# Add relevant documents to filtered_docs
 		if grade == "yes" or grade == "1":
-			print("---GRADE: DOCUMENT RELEVANT")
+			logger.info("---GRADE: DOCUMENT RELEVANT, adding to state---")
 			filtered_docs.append(doc)
 		else:
-			print("GRADE: DOCUMENT NOT RELEVANT")
+			logger.info("---GRADE: DOCUMENT NOT RELEVANT, continuing---")
 			web_search = "Yes"
 			continue
 		

@@ -1,7 +1,10 @@
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama import ChatOllama
+from src.logger import get_logger
 
+
+logger = get_logger(__name__)
 LLM = ChatOllama(model="deepseek-r1:1.5b", temperature=0)
 
 ANSGEN_PROMPT = PromptTemplate(
@@ -22,13 +25,12 @@ def generate_response(state: dict):
 		state: Current state of graph
 
 	Returns:
-		state: New key added to state, generation that contains LLM response
+		state: New key "generation" added to state that contains LLM response
 	"""
-	print("---GENERATE RESPONSE---")
-	question = state["question"]
-	documents = state["documents"]
-
-	rag_chain = ANSGEN_PROMPT | LLM | StrOutputParser()
+	logger.info("---GENERATE RESPONSE---")
+	question, documents = state["question"], state["documents"]
 	
+	rag_chain = ANSGEN_PROMPT | LLM | StrOutputParser()
 	generation = rag_chain.invoke({"context": documents, "question": question})
+	
 	return {"documents": documents, "question": question, "generation": generation} 
