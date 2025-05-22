@@ -1,4 +1,5 @@
 # StudyBuddy: Local RAG Agent built with Deepseek R1 and Langgraph
+<img width="1280" alt="image" src="https://github.com/user-attachments/assets/558e19c7-11a4-4afd-a87f-0a8c75457c32" />
 
 # RAG Architecture
 ![image](https://github.com/user-attachments/assets/9fa3b5b3-ac08-4e2c-9ab1-ece947ef0b41)
