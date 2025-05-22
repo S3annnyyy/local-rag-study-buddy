@@ -28,20 +28,20 @@ def remove_vectorstore_folders(project_path="./"):
 	for item in os.listdir(project_path):
 			item_path = os.path.join(project_path, item)
 			if os.path.isdir(item_path) and item.startswith("vectorstore_"):
-					try:
-							logger.info(f"Removing folder: {item_path}")
-							shutil.rmtree(item_path)
-							st.toast(f'{item_path} removed ✅', icon='🗑️')
-							folders_removed = True
-					except Exception as e:
-							logger.error(f"Failed to remove {item_path}: {e}")
-							st.toast(f'Failed to remove {item_path}', icon='❌')
+				try:
+					logger.info(f"Removing folder: {item_path}")
+					shutil.rmtree(item_path)
+					st.toast(f'{item_path} removed ✅', icon='🗑️')
+					folders_removed = True
+				except Exception as e:
+					logger.error(f"Failed to remove {item_path}: {e}")
+					st.toast(f'Failed to remove {item_path}', icon='❌')
 	
 	if not folders_removed:
-			st.toast("No vectorstore folders found to remove.", icon="ℹ️")
+		st.toast("No vectorstore folders found to remove.", icon="ℹ️")
 
 def main():
-	st.set_page_config(page_title="StudyDaddy", layout="wide", page_icon="src/assets/icon_logo.png",) 
+	st.set_page_config(page_title="StudyBuddy", layout="wide", page_icon="src/assets/icon_logo.png",) 
 	st.logo(image="src/assets/logo.png", icon_image="src/assets/icon_logo.png", link="https://shorturl.at/KXt0L")
 
 	# Initialize session states
