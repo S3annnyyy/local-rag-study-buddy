@@ -15,7 +15,12 @@ def clear_chat():
 	st.session_state.uploader_key = 0
 
 def main():
-	st.set_page_config(page_title="StudyDaddy", layout="wide") 
+	st.set_page_config(page_title="StudyDaddy", layout="wide", page_icon="src/assets/icon_logo.png",) 
+	st.logo(
+    image="src/assets/logo.png",
+	icon_image="src/assets/icon_logo.png",
+	link="https://shorturl.at/KXt0L"
+	)
 
 	# Initialize session states
 	if "processing_complete" not in st.session_state:
@@ -35,11 +40,16 @@ def main():
 	if "enable_rag" not in st.session_state:
 		st.session_state.enable_rag = False
 
-	# Title row with clear button
-	col1, col2 = st.columns([6, 1])
+	# Title row with two side-by-side buttons
+	col1, col2, col3 = st.columns([6, 1, 1])
+
 	with col2:
-		if st.button("Clear Chat", use_container_width=True):
+		if st.button("Clear Chat 🗪", use_container_width=True):
 			clear_chat()
+			st.rerun()
+
+	with col3:
+		if st.button("Clear data 🛢", use_container_width=True):
 			st.rerun()
 
 	# Sidebar configuration
