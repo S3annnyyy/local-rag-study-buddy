@@ -5,9 +5,11 @@ from src.agent.nodes.grade_documents import retrieval_grader
 from src.agent.nodes.answer_generation import generate_response
 from src.agent.edges.answer_generation_edge import decide_to_generate
 from src.agent.edges.grader_edge import hallucination_grader
+from src.logger import get_logger
 from typing_extensions import TypedDict
 from typing import List
 
+logger = get_logger(__name__)
 
 # Initialize state
 class LangGraphState(TypedDict):
@@ -53,3 +55,4 @@ workflow.add_conditional_edges(
 
 # Compile graph
 RAG_AGENT = workflow.compile()
+logger.info("RAG Workflow compiled")

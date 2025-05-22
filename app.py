@@ -1,78 +1,12 @@
-import re
 import torch
 import pyperclip
 import streamlit as st
-from src.utils import process_uploaded_files, invoke_ollama
+from src.utils import process_uploaded_files, generate_response 
 from src.logger import get_logger
 from src.theme.custom import set_custom_theme
-from src.agent.workflow import RAG_AGENT
 
 torch.classes.__path__ = [] # Little hack to remove torch.classes.__path__ runtime error [REF: Issue #1] 
 logger = get_logger(__name__)
-
-def extract_response_components(generation: str):
-	"""
-	Extracts the <think></think> reasoning block and final answer from generation text.
-	"""
-	think_block, final_answer = "", generation
-
-	# Find <think> block
-	think_match = re.search(r"<think>(.*?)</think>", generation, re.DOTALL)
-	if think_match:
-		think_block = think_match.group(1).strip()
-		# Remove think block from final answer
-		final_answer = re.sub(r"<think>.*?</think>", "", generation, flags=re.DOTALL).strip()
-
-	logger.debug("Extracted think_block and final_answer from generation.")
-	return think_block, final_answer
-
-def generate_response(user_input: str, enable_web_search: bool, max_search_queries: int, enable_rag):
-	"""
-	Generate a response based on the user input using the agent, with optional web search capability.
-	Returns:
-		dict: The generated response and reasoning.
-	"""
-	langgraph_status = st.status("**Agent running...**", state="running")  # Sets status to running
-	logger.info(f"Received user input: {user_input}")
-	inputs = {"question": user_input}
-	final_generation, think_block = None, None
-
-	if enable_rag:
-		logger.info("Routing user input to RAG workflow.")
-		try:
-			for output in RAG_AGENT.stream(inputs):
-				for key, value in output.items():
-					if "generation" in value:
-						final_generation = value["generation"]
-
-			if final_generation is None:
-				final_generation = "Agent couldn't find an answer."
-
-			think_block, final_answer = extract_response_components(final_generation)
-
-			# Display think block if exists
-			if think_block:
-				with st.expander("🧠 See agent's reasoning"):
-					st.markdown(think_block)	
-			
-			langgraph_status.update(state="complete", label="**Using LangGraph** (Tasks completed)")
-			logger.info("RAG workflow completed successfully.")
-
-		except Exception as e:
-			final_answer = f"An error occurred: {str(e)}"
-			think_block = ""
-			langgraph_status.update(state="error", label="Something went wrong.")
-			logger.error(f"Exception in RAG workflow: {e}")
-	else:
-		logger.info("Routing user input to direct LLM generation.")
-		final_generation = invoke_ollama(user_input, history=st.session_state.messages)
-		think_block, final_answer = extract_response_components(final_generation)
-		logger.info("Direct LLM generation completed.")
-	
-	logger.debug("Generated response and parsing to frontend.")
-	langgraph_status.update(state="complete", label="**Using Deepseek R1 model**")
-	print("Output retrieved, parsing to frontend")
-	return {"final_answer": final_answer, "reasoning": think_block}
 
 def clear_chat():
 	logger.info("Clearing chat session state.")
@@ -203,9 +137,7 @@ def main():
 		# Generate and display assistant response
 		assistant_response = generate_response(
 			user_input, 
-			enable_web_search, 
-			st.session_state.max_search_queries,
-			st.session_state.enable_rag
+			st
 		)
 
 		# Store assistant message
