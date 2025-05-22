@@ -1,4 +1,7 @@
+import os
+import shutil
 import torch
+import time
 import pyperclip
 import streamlit as st
 from src.utils import process_uploaded_files, generate_response 
@@ -14,13 +17,32 @@ def clear_chat():
 	st.session_state.processing_complete = False
 	st.session_state.uploader_key = 0
 
+def remove_vectorstore_folders(project_path="./"):
+	"""
+	Removes all folders in the specified project directory whose names start with 'vectorstore_'.
+	Displays a toast message in Streamlit for each removed folder.
+	"""
+	folders_removed = False
+	st.toast('Finding vectorstores...')
+	time.sleep(.5)
+	for item in os.listdir(project_path):
+			item_path = os.path.join(project_path, item)
+			if os.path.isdir(item_path) and item.startswith("vectorstore_"):
+					try:
+							logger.info(f"Removing folder: {item_path}")
+							shutil.rmtree(item_path)
+							st.toast(f'{item_path} removed ✅', icon='🗑️')
+							folders_removed = True
+					except Exception as e:
+							logger.error(f"Failed to remove {item_path}: {e}")
+							st.toast(f'Failed to remove {item_path}', icon='❌')
+	
+	if not folders_removed:
+			st.toast("No vectorstore folders found to remove.", icon="ℹ️")
+
 def main():
 	st.set_page_config(page_title="StudyDaddy", layout="wide", page_icon="src/assets/icon_logo.png",) 
-	st.logo(
-    image="src/assets/logo.png",
-	icon_image="src/assets/icon_logo.png",
-	link="https://shorturl.at/KXt0L"
-	)
+	st.logo(image="src/assets/logo.png", icon_image="src/assets/icon_logo.png", link="https://shorturl.at/KXt0L")
 
 	# Initialize session states
 	if "processing_complete" not in st.session_state:
@@ -50,10 +72,7 @@ def main():
 
 	with col3:
 		if st.button("Clear data 🛢", use_container_width=True):
-			st.rerun()
-
-	# Sidebar configuration
-	st.sidebar.title("StudyDaddy")
+			remove_vectorstore_folders()
 
 	# Theme toggle
 	with st.sidebar:  
