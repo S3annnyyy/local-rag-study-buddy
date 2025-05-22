@@ -9,6 +9,9 @@ def set_custom_theme(is_dark_mode, st):
         "button_hover_bg": "#3c3f45",
         "border_color": "#3c3f45",
         "chat_color": "#2a2e36",
+        "file_drop_bg": "#161a21",
+        "file_drop_txt": "#ffffff",
+        "file_drop_subtxt": "#e0e0e0"
     }
 
     light_theme = {
@@ -20,26 +23,30 @@ def set_custom_theme(is_dark_mode, st):
         "button_hover_bg": "#cccccc",
         "border_color": "#dddddd",
         "chat_color": "#2a2e36",
+        "file_drop_bg": "#ffffff",
+        "file_drop_txt": "#000000",
+        "file_drop_subtxt": "#31333F99"
     }
 
     theme = dark_theme if is_dark_mode else light_theme
 
     css = f"""
     <style>
-    /* Top header bar */
-    header[data-testid="stHeader"] {{
+    /* Top header bar and bottom bar and main body  */
+    header[data-testid="stHeader"], div[data-testid="stBottomBlockContainer"], .stApp {{
         background-color: {theme['background_color']};
         color: {theme['text_color']};
     }}
-    body, .stApp {{
-        background-color: {theme['background_color']};
-        color: {theme['text_color']};
+
+    section[data-testid="stSidebar"] svg circle,
+    section[data-testid="stSidebar"] svg path,
+    section[data-testid="stSidebar"] svg line {{
+        stroke: {theme['text_color']};
     }}
-    section[data-testid="stSidebar"] {{
+
+    /* Sidebar */
+    section[data-testid="stSidebar"], section[data-testid="stSidebar"] p {{
         background-color: {theme['sidebar_bg']};
-        color: {theme['text_color']};
-    }}
-    section[data-testid="stSidebar"] * {{
         color: {theme['text_color']} !important;
     }}
     section[data-testid="stSidebar"] input,
@@ -49,77 +56,61 @@ def set_custom_theme(is_dark_mode, st):
         border: 1px solid {theme['border_color']};
     }}
     section[data-testid="stSidebar"] .stNumberInput button {{
-        background-color: {theme['button_bg']};
+        background-color: {theme['input_bg']};
         color: {theme['text_color']} !important;
-        border: 1px solid {theme['border_color']};
     }}
     section[data-testid="stSidebar"] .stNumberInput button:hover {{
         background-color: {theme['button_hover_bg']};
         color: #ffffff !important;
     }}
-    div[data-testid="stBottomBlockContainer"] {{
-        background-color: {theme['background_color']};
-        color: {theme['text_color']} !important;
-    }}   
 
-    /* The file drop text */
-    div[data-testid="stFileUploader"] label {{
-        color: {theme['text_color']} !important;
+    /* File drop widget */
+    section[data-testid="stFileUploaderDropzone"] {{
+        background-color: {theme['file_drop_bg']};
+        border: 1px solid #ffffff;
     }}
+    section[data-testid="stFileUploaderDropzone"] span {{
+        color: {theme['file_drop_txt']} !important;
+    }}
+    section[data-testid="stFileUploaderDropzone"] small {{
+        color: {theme['file_drop_subtxt']} !important;
+    }}    
 
-    /* Uploader area hover state (if any) */
-    div[data-testid="stFileUploader"]:hover {{
-        background-color: {theme['sidebar_bg']};
-    }}
-
-    /* Chat Input Container */
-    div[data-testid="stChatInputContainer"] {{
-        background-color: {theme['sidebar_bg']};
-        border-top: 1px solid {theme['border_color']};
-    }}
-
-    /* Textarea inside chat input */
-    textarea[data-testid="stChatInputTextArea"] {{
-        color: {theme['text_color']} !important;
-        border: 1px solid {theme['border_color']} !important;
-    }}
-
-    /* Send button */
-    button[data-testid="stChatInputSubmitButton"] {{
-        color: {theme['text_color']} !important;
-        border: 1px solid {theme['border_color']} !important;
-    }}
-
-    /* Send button on hover */
-    button[data-testid="stChatInputSubmitButton"]:hover {{
-        color: #ffffff !important;
-    }}
-
-    /* Send button when disabled */
-    button[data-testid="stChatInputSubmitButton"]:disabled {{
-        color: {theme['text_color']} !important;
-        opacity: 0.5;
-    }}
-    button[data-testid="stChatInputSubmitButton"]:disabled {{
-        color: {theme['text_color']} !important;
-        opacity: 0.5;
-    }}
-    .stChatMessage {{
-        background-color: {theme['sidebar_bg']};
-        color: {theme['text_color']};
-    }}
+    /* Buttons */
     .stButton button {{
         background-color: {theme['input_bg']};
         color: {theme['text_color']} !important;
         border: 1px solid {theme['border_color']};
     }}
-    .stTextInput input {{
-        background-color: {theme['input_bg']};
-        color: {theme['text_color']} !important;
-        border: 1px solid {theme['border_color']};
-    }}
-    .stMarkdown, .stMarkdown p {{
+
+    /* Chat messages */
+    .stChatMessage, .stMarkdown {{
+        background-color: {theme['sidebar_bg']};
         color: {theme['text_color']};
+    }}
+
+    /* User input */
+    textarea[data-testid="stChatInputTextArea"],
+    textarea[data-testid="stChatInputTextArea"]::placeholder {{
+        background-color: {theme['sidebar_bg']};
+        color: {theme['text_color']} !important;
+        padding-left: 10px;
+    }}
+    .st-emotion-cache-yd4u6l, .e1togvvn1 {{
+        background-color: {theme['sidebar_bg']};
+    }}  
+    /* Send button */
+    button[data-testid="stChatInputSubmitButton"] {{
+        color: {theme['text_color']} !important;        
+    }}
+    /* Send button on hover */
+    button[data-testid="stChatInputSubmitButton"]:hover {{
+        color: #ffffff !important;
+    }}
+    /* Send button when disabled */
+    button[data-testid="stChatInputSubmitButton"]:disabled {{
+        color: {theme['text_color']} !important;
+        opacity: 0.5;
     }}
     </style>
     """
