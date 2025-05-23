@@ -23,7 +23,7 @@ TAVILY_API_KEY=XXX
 ```
 python -m venv .venv
 ```
-4. Activate environment by running `.venv/Scripts/Activate.ps1` for Windows Powershell or `source venv/bin/activate` for MacOs/Linux 
+4. Activate environment by running `.venv/Scripts/Activate.ps1` for Windows Powershell or `source .venv/bin/activate` for MacOs/Linux 
 5. Install [ollama](https://www.ollama.com/) and download deepseek-R1 model by running the following in command prompt: (You can choose bigger models)
 ```
 ollama pull deepseek-r1:1.5b
@@ -33,7 +33,7 @@ ollama run deepseek-r1:1.5b
 
 ### Install dependencies with:
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 Once it's done start up by running this command in the terminal:

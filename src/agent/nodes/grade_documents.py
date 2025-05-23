@@ -56,7 +56,7 @@ def retrieval_grader(state: dict):
 
 	filtered_docs, web_search = [], "No"
 	for doc in documents:
-		logger.info(f"Analyzing {doc.metadata["source"]}")
+		logger.info(f"Analyzing {doc.metadata['source']}")
 		score = retrieval_grader.invoke({"question": question, "document": doc.page_content})
 		grade = score["score"]
 		logger.info(f"Is document relevant?: {grade}")
