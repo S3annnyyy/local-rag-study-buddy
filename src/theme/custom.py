@@ -11,7 +11,8 @@ def set_custom_theme(is_dark_mode, st):
         "chat_color": "#2a2e36",
         "file_drop_bg": "#161a21",
         "file_drop_txt": "#ffffff",
-        "file_drop_subtxt": "#e0e0e0"
+        "file_drop_subtxt": "#e0e0e0",
+        "code_bg": "#222831"
     }
 
     light_theme = {
@@ -25,7 +26,8 @@ def set_custom_theme(is_dark_mode, st):
         "chat_color": "#2a2e36",
         "file_drop_bg": "#ffffff",
         "file_drop_txt": "#000000",
-        "file_drop_subtxt": "#31333F99"
+        "file_drop_subtxt": "#31333F99",
+        "code_bg": "#ffffff"
     }
 
     theme = dark_theme if is_dark_mode else light_theme
@@ -111,6 +113,22 @@ def set_custom_theme(is_dark_mode, st):
     button[data-testid="stChatInputSubmitButton"]:disabled {{
         color: {theme['text_color']} !important;
         opacity: 0.5;
+    }}
+
+    /* Code markdown  */
+    div[data-testid="stMarkdownPre"] .st-emotion-cache-1nqbjoj,
+    .stMainBlockContainer .st-emotion-cache-ao4qku {{
+        background-color: {theme['code_bg']} !important;
+        color: {theme['file_drop_subtxt']} !important;        
+    }} 
+    .stCode {{
+        padding-right: 1.5em;
+    }}
+    .st-emotion-cache-chk1w8 {{
+        margin-right: 1.5em;
+    }}
+    .st-emotion-cache-chk1w8 svg {{
+        color: {theme['file_drop_txt']} !important;
     }}
     </style>
     """
