@@ -40,9 +40,9 @@ def set_custom_theme(is_dark_mode, st):
         color: {theme['text_color']};
     }}
 
-    section[data-testid="stSidebar"] svg circle,
-    section[data-testid="stSidebar"] svg path,
-    section[data-testid="stSidebar"] svg line {{
+    div[data-testid="stTooltipHoverTarget"] svg circle,
+    div[data-testid="stTooltipHoverTarget"] svg path,
+    div[data-testid="stTooltipHoverTarget"] svg line {{
         stroke: {theme['text_color']};
     }}
 
