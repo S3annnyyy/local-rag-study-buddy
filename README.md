@@ -1,5 +1,6 @@
 # StudyBuddy: Local RAG Agent built with Deepseek R1 and Langgraph
-<img width="1280" alt="image" src="https://github.com/user-attachments/assets/558e19c7-11a4-4afd-a87f-0a8c75457c32" />
+I built a corrective AI RAG agent using LangGraph and DeepSeek R1 model running on Ollama. This agent acts like a study buddy, designed to help students summarize their notes and answer their queries.
+![rag_demo_2 (1)](https://github.com/user-attachments/assets/481c0589-5938-44bd-add1-dc0bba187bca)
 
 # RAG Architecture
 ![image](https://github.com/user-attachments/assets/9fa3b5b3-ac08-4e2c-9ab1-ece947ef0b41)
