@@ -103,11 +103,6 @@ def generate_response(user_input: str, st: types.ModuleType):
 				final_generation = "Agent couldn't find an answer."
 
 			think_block, final_answer = extract_response_components(final_generation)
-
-			# Display think block if exists
-			if think_block:
-				with st.expander("🧠 See agent's reasoning"):
-					st.markdown(think_block)	
 			
 			langgraph_status.update(state="complete", label="**Using LangGraph** (Tasks completed)")
 			logger.info("RAG workflow completed successfully.")

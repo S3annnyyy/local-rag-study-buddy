@@ -26,16 +26,16 @@ def remove_vectorstore_folders(project_path="./"):
 	st.toast('Finding vectorstores...')
 	time.sleep(.5)
 	for item in os.listdir(project_path):
-			item_path = os.path.join(project_path, item)
-			if os.path.isdir(item_path) and item.startswith("vectorstore_"):
-				try:
-					logger.info(f"Removing folder: {item_path}")
-					shutil.rmtree(item_path)
-					st.toast(f'{item_path} removed ✅', icon='🗑️')
-					folders_removed = True
-				except Exception as e:
-					logger.error(f"Failed to remove {item_path}: {e}")
-					st.toast(f'Failed to remove {item_path}', icon='❌')
+		item_path = os.path.join(project_path, item)
+		if os.path.isdir(item_path) and item.startswith("vectorstore_"):
+			try:
+				logger.info(f"Removing folder: {item_path}")
+				shutil.rmtree(item_path)
+				st.toast(f'{item_path} removed ✅', icon='🗑️')
+				folders_removed = True
+			except Exception as e:
+				logger.error(f"Failed to remove {item_path}: {e}")
+				st.toast(f'Failed to remove {item_path}', icon='❌')
 	
 	if not folders_removed:
 		st.toast("No vectorstore folders found to remove.", icon="ℹ️")
@@ -61,6 +61,8 @@ def main():
 		st.session_state.files_ready = False  # Tracks if files are uploaded but not processed
 	if "enable_rag" not in st.session_state:
 		st.session_state.enable_rag = False
+	if "think_block" not in st.session_state:
+		st.session_state.think_blocks = []
 
 	# Title row with two side-by-side buttons
 	col1, col2, col3 = st.columns([6, 1, 1])
@@ -148,12 +150,22 @@ def main():
 	# Display chat messages
 	for index, message in enumerate(st.session_state.messages):
 		with st.chat_message(message["role"]):
-			st.write(message["content"])  # Show the message normally
+			if "reasoning" in message:
+				logger.info(f"Rendering reasoning block {index}")
+				with st.expander("🧠 See agent's reasoning"):
+					st.markdown(message["reasoning"])
 
-			# Show copy button only for AI messages at the bottom
-			if message["role"] == "assistant":
-				if st.button("📋", key=f"copy_{index}"):
-					pyperclip.copy(message["content"])
+			logger.info(f"Rendering response {index}")
+
+			msg_col, btn_col = st.columns([10, 1])  
+
+			with msg_col:
+				st.write(message["content"])
+
+			with btn_col:
+				if message["role"] == "assistant":
+					st.button("📋", key=f"copy_{index}", on_click=pyperclip.copy, args=(message["content"],))
+
 
 	
 	# Chat input and response handling
@@ -164,13 +176,14 @@ def main():
 			st.write(user_input)
 
 		# Generate and display assistant response
-		assistant_response = generate_response(
-			user_input, 
-			st
-		)
+		assistant_response = generate_response(user_input, st)
 
 		# Store assistant message
-		st.session_state.messages.append({"role": "assistant", "content": assistant_response["final_answer"]})
+		st.session_state.messages.append({
+			"role": "assistant", 
+			"content": assistant_response["final_answer"], 
+			"reasoning": assistant_response["reasoning"]
+		})
 
 		with st.chat_message("assistant"):
 			st.write(assistant_response["final_answer"])  # Deepseek response

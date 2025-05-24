@@ -130,6 +130,18 @@ def set_custom_theme(is_dark_mode, st):
     .st-emotion-cache-chk1w8 svg {{
         color: {theme['file_drop_txt']} !important;
     }}
+
+    /* Expander styling */
+    [data-testid="stExpander"] {{
+        background-color: {theme['sidebar_bg']};
+        color: {theme['text_color']};
+        border: 1px solid {theme['border_color']};
+        border-radius: 6px;
+        margin-right: 10px;
+    }}
+    [data-testid="stExpander"] .st-emotion-cache-1v0mbdj {{
+        color: {theme['text_color']};
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
