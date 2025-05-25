@@ -48,13 +48,13 @@ def hallucination_grader(state: dict):
 	hallucination_score = hallucinationGrader.invoke({"documents": documents, "generation": generation})
 	logger.info(f"Hallucination_score: {hallucination_score}")
 
-	hallucination_grade = hallucination_score["score"]
+	hallucination_grade = hallucination_score.get("score", "no")
 	
 	if hallucination_grade.lower() == "yes":
 		logger.info("---DECISION: LLM GENERATION IS GROUNDED IN DOCUMENTS---") 
 		logger.info("---GRADE LLM GENERATION AGAINST USER QUESTION---")
 		answer_score = answerGrader.invoke({"question": question, "generation": generation})
-		answer_grade = answer_score["score"]
+		answer_grade = answer_score.get("score", "no")
 		logger.info(f"Answer Grade: {answer_grade}")
 
 		if answer_grade.lower() == "yes":
@@ -65,4 +65,11 @@ def hallucination_grader(state: dict):
 	else:
 		logger.info("---DECISION: GENERATION IS NOT GROUNDED IN DOCUMENTS---")
 	
+	curr_search_count, search_limit = state.get("curr_search_count", 0), state.get("max_search_queries")
+	logger.info(f"Current search count: {curr_search_count}, limit: {search_limit}")
+	if curr_search_count >= search_limit:		
+		logger.info("---DECISION: SEARCH LIMIT EXCEEDED, OUTPUTTING BEST GUESS---")
+		return "useful"
+	
+	logger.info("---DECISION: SEARCH LIMIT NOT EXCEEDED, CONTINUING WEB SEARCH---")
 	return "not useful"

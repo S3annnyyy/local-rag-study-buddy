@@ -48,25 +48,29 @@ def retrieval_grader(state: dict):
 	Returns:
 		state: Filtered to contain only relevant documents + updated web search state 
 	"""
-	# Init retrieval grader
-	retrieval_grader = RETRIEVAL_PROMPT | LLM | JsonOutputParser()
-
-	logger.info("---CHECK DOCUMENT RELEVANCE TO THE QUESTION---")
 	question, documents = state["question"], state["documents"]
+	web_search = "Yes" if not documents else "No"
+	filtered_docs = []
 
-	filtered_docs, web_search = [], "No"
-	for doc in documents:
-		logger.info(f"Analyzing {doc.metadata['source']}")
-		score = retrieval_grader.invoke({"question": question, "document": doc.page_content})
-		grade = score["score"]
-		logger.info(f"Is document relevant?: {grade}")
-		# Add relevant documents to filtered_docs
-		if grade == "yes" or grade == "1":
-			logger.info("---GRADE: DOCUMENT RELEVANT, adding to state---")
-			filtered_docs.append(doc)
-		else:
-			logger.info("---GRADE: DOCUMENT NOT RELEVANT, continuing---")
-			web_search = "Yes"
-			continue
+	if documents:
+		logger.info("---CHECK DOCUMENT RELEVANCE TO THE QUESTION---")
+		retrieval_grader = RETRIEVAL_PROMPT | LLM | JsonOutputParser()
 		
+		for doc in documents:
+			logger.info(f"Analyzing {doc.metadata['source']}")
+			score = retrieval_grader.invoke({"question": question, "document": doc.page_content})
+			grade = score["score"]
+
+			logger.info(f"Is document relevant?: {grade}")
+			
+			if grade in {"yes", "1"}:
+				logger.info("---GRADE: DOCUMENT RELEVANT, adding to state---")
+				filtered_docs.append(doc)
+			else:
+				logger.info("---GRADE: DOCUMENT NOT RELEVANT, continuing---")
+				web_search = "Yes"
+			
+	if not filtered_docs:
+		web_search = "Yes"
+	
 	return {"documents": filtered_docs, "question": question, "web_search": web_search}

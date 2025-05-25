@@ -1,6 +1,9 @@
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain.schema import Document
 from src.config import TAVILY_API_KEY
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 def tavily_web_search_tool(state: dict):
     """
@@ -12,9 +15,8 @@ def tavily_web_search_tool(state: dict):
     Returns:
         state: Appended web results to documents
     """
-    print("---WEB SEARCH---")
-    question = state["question"]
-    documents = state["documents"]
+    logger.info("---STARTING WEB SEARCH---")
+    question, documents, search_count = state["question"], state["documents"], state.get("curr_search_count", 0)
     web_search_tool = TavilySearchResults(k=3, tavily_api_key=TAVILY_API_KEY) 
 
     documents_searched = web_search_tool.invoke({"query": question})
@@ -25,5 +27,6 @@ def tavily_web_search_tool(state: dict):
         documents.append(web_results)
     else:
         documents = [web_results]
-    
-    return {"documents": documents, "question": question}
+     
+    search_count += 1
+    return {"documents": documents, "question": question, "curr_search_count": search_count}

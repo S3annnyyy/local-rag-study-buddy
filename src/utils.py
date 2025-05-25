@@ -88,7 +88,7 @@ def generate_response(user_input: str, st: types.ModuleType):
 	"""
 	langgraph_status = st.status("**Agent running...**", state="running")  # Sets status to running
 	logger.info(f"Received user input: {user_input}")
-	inputs = {"question": user_input}
+	inputs = {"question": user_input, "max_search_queries": st.session_state.max_search_queries}
 	final_generation, think_block = None, None
 
 	if st.session_state.enable_rag:

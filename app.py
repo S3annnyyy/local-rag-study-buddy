@@ -52,101 +52,110 @@ def main():
 	if "messages" not in st.session_state:
 		st.session_state.messages = []
 	if "max_search_queries" not in st.session_state:
-		st.session_state.max_search_queries = 5  # Default value of 5
+		st.session_state.max_search_queries = 5  
 	if "chunk_size" not in st.session_state:
 		st.session_state.chunk_size = 1000
 	if "chunk_overlap" not in st.session_state:
 		st.session_state.chunk_overlap = 200
 	if "files_ready" not in st.session_state:
-		st.session_state.files_ready = False  # Tracks if files are uploaded but not processed
+		st.session_state.files_ready = False  
 	if "enable_rag" not in st.session_state:
 		st.session_state.enable_rag = False
 	if "think_block" not in st.session_state:
 		st.session_state.think_blocks = []
 
 	# Title row with two side-by-side buttons
-	col1, col2, col3 = st.columns([6, 1, 1])
+	_, _, midCol, rightCol = st.columns([4, 2, 1, 1], vertical_alignment="bottom")
 
-	with col2:
-		if st.button("Clear Chat 🗪", use_container_width=True):
+	# with leftCol:
+	# 	selected_model = st.multiselect(
+	# 		"Choose your model",
+	# 		[
+	# 			"deepseek-r1:1.5b",
+	# 			"deepseek-r1:7b",
+	# 			"deepseek-r1:14b",
+	# 		],
+	# 		default="deepseek-r1:1.5b"			
+	# 	)
+
+	with midCol:
+		if st.button("Clear Chat", use_container_width=True):
 			clear_chat()
 			st.rerun()
 
-	with col3:
-		if st.button("Clear data 🛢", use_container_width=True):
+	with rightCol:
+		if st.button("Clear data", use_container_width=True):
 			remove_vectorstore_folders()
 
-	# Theme toggle
-	with st.sidebar:  
+	with st.sidebar:
+		# Theme toggle  
 		is_dark_mode = st.sidebar.toggle("Dark Mode", value=False)
-	set_custom_theme(is_dark_mode, st)
+		set_custom_theme(is_dark_mode, st)
 
-	# Maximum search queries input
-	st.session_state.max_search_queries = st.sidebar.number_input(
-		label="Number of search queries",
-		min_value=1,
-		max_value=10,
-		value=st.session_state.max_search_queries,
-		help="The maximum number of search queries LLM can make. (1-10)"
-	)
+		# Maximum search queries input
+		st.session_state.max_search_queries = st.sidebar.number_input(
+			label="Number of search queries",
+			min_value=1,
+			max_value=10,
+			value=st.session_state.max_search_queries,
+			help="The maximum number of search queries LLM can make. (1-10)"
+		)
 	
-	enable_web_search = st.sidebar.checkbox("Enable Web Search", value=False)
-	st.session_state.enable_rag = st.sidebar.checkbox("Enable RAG", value=st.session_state.enable_rag)
+		st.session_state.enable_rag = st.sidebar.checkbox("Enable RAG", value=st.session_state.enable_rag)
 	
-	# Chunk overlap
-	st.session_state.chunk_overlap = st.sidebar.slider(
-		label="Chunk overlap",
-		min_value=0,
-		max_value=400,
-		value=st.session_state.chunk_overlap,
-		help="Makes sure important information at the edges is repeated in the next piece so nothing gets lost (Recommended 200-400)"
-	)
+		# Chunk overlap
+		st.session_state.chunk_overlap = st.sidebar.slider(
+			label="Chunk overlap",
+			min_value=0,
+			max_value=400,
+			value=st.session_state.chunk_overlap,
+			help="Makes sure important information at the edges is repeated in the next piece so nothing gets lost (Recommended 200-400)"
+		)
 
-	# Chunk size
-	st.session_state.chunk_size = st.sidebar.slider(
-		label="Chunk size",
-		min_value=0,
-		max_value=2000,
-		value=st.session_state.chunk_size,
-		help="How big each piece of text is when splitting a document (Recommended 1000-2000)"
-	)
+		# Chunk size
+		st.session_state.chunk_size = st.sidebar.slider(
+			label="Chunk size",
+			min_value=0,
+			max_value=2000,
+			value=st.session_state.chunk_size,
+			help="How big each piece of text is when splitting a document (Recommended 1000-2000)"
+		)
 
-	# Upload file logic
-	uploaded_files = st.sidebar.file_uploader(
-		label="Upload Study Materials",
-		type=["pdf", "txt", "csv", "md"],
-		accept_multiple_files=True,
-		key=f"uploader_{st.session_state.uploader_key}",
-		help="Gives LLM context to reference"
-	)
+		# Upload file logic
+		uploaded_files = st.sidebar.file_uploader(
+			label="Upload Study Materials",
+			type=["pdf", "txt", "csv", "md"],
+			accept_multiple_files=True,
+			key=f"uploader_{st.session_state.uploader_key}",
+			help="Gives LLM context to reference"
+		)
 
-	# Check if files are uploaded but not yet processed
-	if uploaded_files:
-		logger.info(f"{len(uploaded_files)} files uploaded.")
-		st.session_state.enable_rag = True
-		st.session_state.files_ready = True  # Mark that files are available
-		st.session_state.processing_complete = False  # Reset processing status
+		# Check if files are uploaded but not yet processed
+		if uploaded_files:
+			logger.info(f"{len(uploaded_files)} files uploaded.")
+			st.session_state.enable_rag = True
+			st.session_state.files_ready = True  # Mark that files are available
+			st.session_state.processing_complete = False  # Reset processing status
 
-	# Display the "Upload files" button when user upload files 
-	if st.session_state.files_ready and not st.session_state.processing_complete:
-		process_button_placeholder = st.sidebar.empty()  
+		# Display the "Upload files" button when user upload files 
+		if st.session_state.files_ready and not st.session_state.processing_complete:
+			process_button_placeholder = st.sidebar.empty()  
 
-		with process_button_placeholder.container():
-			process_clicked = st.button("Upload files", use_container_width=True)
+			with process_button_placeholder.container():
+				process_clicked = st.button("Upload files", use_container_width=True)
 
-		if process_clicked:
-			with process_button_placeholder:
-				with st.status("Processing files...", expanded=False) as status:
-					logger.info("Starting file processing.")
-					if process_uploaded_files(uploaded_files, st.session_state.chunk_size, st.session_state.chunk_overlap):
-						st.session_state.processing_complete = True
-						st.session_state.files_ready = False  # Reset files ready flag
-						st.session_state.uploader_key += 1  # Reset uploader to allow new uploads
-						logger.info("Files processed successfully.")
+			if process_clicked:
+				with process_button_placeholder:
+					with st.status("Processing files...", expanded=False) as status:
+						logger.info("Starting file processing.")
+						if process_uploaded_files(uploaded_files, st.session_state.chunk_size, st.session_state.chunk_overlap):
+							st.session_state.processing_complete = True
+							st.session_state.files_ready = False  # Reset files ready flag
+							st.session_state.uploader_key += 1  # Reset uploader to allow new uploads
+							logger.info("Files processed successfully.")
 
-					status.update(label="Files uploaded successfully!", state="complete", expanded=False)
-	
-	
+						status.update(label="Files uploaded successfully!", state="complete", expanded=False)
+		
 	# Display chat messages
 	for index, message in enumerate(st.session_state.messages):
 		with st.chat_message(message["role"]):
@@ -156,16 +165,12 @@ def main():
 					st.markdown(message["reasoning"])
 
 			logger.info(f"Rendering response {index}")
-
 			msg_col, btn_col = st.columns([10, 1])  
-
 			with msg_col:
 				st.write(message["content"])
-
 			with btn_col:
 				if message["role"] == "assistant":
 					st.button("📋", key=f"copy_{index}", on_click=pyperclip.copy, args=(message["content"],))
-
 
 	
 	# Chat input and response handling
@@ -186,7 +191,10 @@ def main():
 		})
 
 		with st.chat_message("assistant"):
-			st.write(assistant_response["final_answer"])  # Deepseek response
+			with st.expander("🧠 See agent's reasoning"):
+				st.markdown(assistant_response["reasoning"])
+		
+			st.write(assistant_response["final_answer"])
 
 			# Copy button below the AI message
 			if st.button("📋", key=f"copy_{len(st.session_state.messages)}"):
