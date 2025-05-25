@@ -7,7 +7,7 @@ from src.agent.edges.answer_generation_edge import decide_to_generate
 from src.agent.edges.grader_edge import hallucination_grader
 from src.logger import get_logger
 from typing_extensions import TypedDict
-from typing import List
+from typing import List, Optional
 
 logger = get_logger(__name__)
 
@@ -23,9 +23,12 @@ class LangGraphState(TypedDict):
     documents => corpus of documents for embedding
   """
   question: str
-  generation: str
-  web_search: str
-  documents: List[str]
+  max_search_queries: int
+  curr_search_count: int
+  retry_count: int
+  generation: Optional[str]
+  web_search: Optional[str]
+  documents: Optional[List[str]]
 
 workflow = StateGraph(LangGraphState)
 
