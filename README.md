@@ -41,3 +41,17 @@ Once it's done start up by running this command in the terminal:
 ```
 streamlit run app.py
 ```
+
+# Visualizing workflow with LangGraph Studio
+![rag_workflow](https://github.com/user-attachments/assets/de997d3d-86b5-4d9d-b0d6-e1af3c035e1a)
+1. Sign up for an account [here](https://smith.langchain.com/) and create an API key
+2. Add API key to `.env.local`
+```
+LANGSMITH_API_KEY=lsv2_***
+```
+3. Run the following commands
+```
+pip install -U "langgraph-cli[inmem]"
+langgraph dev
+```
+4. An interface will popup and you can test the worklow through inputs
