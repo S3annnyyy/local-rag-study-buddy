@@ -1,0 +1,11 @@
+{
+    "dockerfile_lines": [],
+    "graphs": {
+      "rag_researcher": "./src/agent/workflow.py:RAG_AGENT"
+    },
+    "python_version": "3.13",
+    "env": ".env.local",
+    "dependencies": [
+      "."
+    ]
+  }

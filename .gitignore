@@ -91,3 +91,6 @@ secrets.json
 
 # Temp files
 **/vectorstore_*
+
+# Langgraph pickles
+**/.langgraph_api 
